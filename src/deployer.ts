@@ -1,12 +1,32 @@
-// Debounced, single-flight deploy scheduler (no I/O; deploy fn is injected).
+/**
+ * Options for configuring the Deployer.
+ */
 export interface DeployerOptions {
+  /**
+   * Function to execute the deployment.
+   */
   deploy: () => Promise<void>;
+  /**
+   * Debounce interval in milliseconds.
+   */
   debounceMs?: number;
+  /**
+   * Maximum number of retry attempts.
+   */
   maxRetries?: number;
+  /**
+   * Delay between retry attempts in milliseconds.
+   */
   retryDelayMs?: number;
+  /**
+   * Logging function for deployment messages.
+   */
   log?: (msg: string) => void;
 }
 
+/**
+ * Deployer handles debounced, single-flight deployment with retry logic.
+ */
 export class Deployer {
   private readonly deploy: () => Promise<void>;
   private readonly debounceMs: number;
@@ -18,6 +38,10 @@ export class Deployer {
   private dirty = false;
   private stopped = false;
 
+  /**
+   * Creates a new Deployer instance.
+   * @param options Configuration options for the deployer.
+   */
   constructor({ deploy, debounceMs = 5000, maxRetries = 3, retryDelayMs = 10000, log = () => {} }: DeployerOptions) {
     this.deploy = deploy;
     this.debounceMs = debounceMs;
@@ -26,7 +50,9 @@ export class Deployer {
     this.log = log;
   }
 
-  // Called on every file change; restarts the quiet-period timer.
+  /**
+   * Notifies the deployer of a file change, restarting the debounce timer.
+   */
   notify(): void {
     if (this.stopped) return;
     this.dirty = true;
@@ -57,6 +83,9 @@ export class Deployer {
     }
   }
 
+  /**
+   * Stops the deployer, cancelling any pending deployments and waiting for the current one to finish.
+   */
   async stop(): Promise<void> {
     this.stopped = true;
     if (this.timer) clearTimeout(this.timer);

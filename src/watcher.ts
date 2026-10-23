@@ -1,3 +1,5 @@
+// Watcher and deployer setup for Cloudflare Workers site.
+
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -15,6 +17,9 @@ if (!existsSync(watchDir)) {
   process.exit(1);
 }
 
+/**
+ * Runs the wrangler deploy command.
+ */
 function runWrangler(): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     log('Deploying with wrangler...');
@@ -29,6 +34,9 @@ function runWrangler(): Promise<void> {
   });
 }
 
+/**
+ * Creates a deployer instance with the specified configuration.
+ */
 const deployer = new Deployer({
   deploy: runWrangler,
   debounceMs,
@@ -37,27 +45,44 @@ const deployer = new Deployer({
   log,
 });
 
+/**
+ * Sets up the file watcher for the specified directory.
+ */
 const watcher = chokidar.watch(watchDir, {
   ignoreInitial: true,
   ignored: (p) => p !== watchDir && /(^|[\\/])(\.[^\\/]+|[^\\/]*~|[^\\/]*\.(swp|tmp))$/.test(p),
-  usePolling: env.USE_POLLING === 'true',
+  backend: env.USE_POLLING === 'true' ? 'polling' : 'auto',
   awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
 });
 
+/**
+ * Handles file change events and notifies the deployer.
+ */
 watcher.on('all', (event, file) => {
   log(`${event}: ${path.relative(watchDir, file)}`);
   deployer.notify();
 });
+
+/**
+ * Handles watcher errors.
+ */
 watcher.on('error', (err: unknown) => log(`Watcher error: ${err instanceof Error ? err.message : String(err)}`));
 
 log(`Watching ${watchDir} (debounce ${debounceMs}ms)`);
 if (env.DEPLOY_ON_START !== 'false') deployer.notify();
 
+/**
+ * Shuts down the watcher and deployer gracefully.
+ */
 async function shutdown(): Promise<void> {
   log('Shutting down...');
   await watcher.close();
   await deployer.stop();
   process.exit(0);
 }
+
+/**
+ * Handles process shutdown signals.
+ */
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
