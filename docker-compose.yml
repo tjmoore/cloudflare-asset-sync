@@ -1,0 +1,10 @@
+services:
+  deployer:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      WATCH_DIR: /app/site
+      USE_POLLING: "true"
+    volumes:
+      - ./site:/app/site:ro

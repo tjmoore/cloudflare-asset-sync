@@ -1,0 +1,16 @@
+{
+  "name": "static-site-deploy-watcher",
+  "version": "1.0.0",
+  "description": "Watches a static site folder and deploys batched changes to a Cloudflare Worker with wrangler",
+  "type": "module",
+  "main": "src/watcher.js",
+  "scripts": {
+    "start": "node src/watcher.js",
+    "test": "node --test test/deployer.test.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "wrangler": "^4.0.0"
+  }
+}
