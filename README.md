@@ -5,7 +5,7 @@ Watches a folder of static files and, once changes have been quiet for `DEBOUNCE
 ## Setup
 1. Edit `wrangler.jsonc` (worker `name`, `assets.directory` = watched folder).
 2. `cp .env.example .env` and set `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` (token needs Workers edit permission).
-3. `npm install && npm start`, or `docker compose up -d --build` (mounts `./site` at `/app/site`).
+3. `npm install && npm run build && npm start`, or `docker compose up -d --build` (mounts `./site` at `/app/site`).
 
 ## Behaviour
 - Every add/change/delete restarts the debounce timer, so bulk changes become one deploy.

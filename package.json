@@ -3,14 +3,19 @@
   "version": "1.0.0",
   "description": "Watches a static site folder and deploys batched changes to a Cloudflare Worker with wrangler",
   "type": "module",
-  "main": "src/watcher.js",
+  "main": "dist/src/watcher.js",
   "scripts": {
-    "start": "node src/watcher.js",
-    "test": "node --test test/deployer.test.js"
+    "build": "tsc",
+    "start": "node dist/src/watcher.js",
+    "test": "tsc && node --test dist/test/deployer.test.js"
   },
   "engines": { "node": ">=20" },
   "dependencies": {
     "chokidar": "^4.0.3",
     "wrangler": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
   }
 }

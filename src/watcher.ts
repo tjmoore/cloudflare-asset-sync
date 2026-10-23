@@ -8,15 +8,15 @@ const env = process.env;
 const watchDir = path.resolve(env.WATCH_DIR || './site');
 const debounceMs = Number(env.DEBOUNCE_MS || 5000);
 const wranglerArgs = (env.WRANGLER_ARGS || '').split(/\s+/).filter(Boolean);
-const log = (msg) => console.log(`[${new Date().toISOString()}] ${msg}`);
+const log = (msg: string): void => console.log(`[${new Date().toISOString()}] ${msg}`);
 
 if (!existsSync(watchDir)) {
   console.error(`WATCH_DIR does not exist: ${watchDir}`);
   process.exit(1);
 }
 
-function runWrangler() {
-  return new Promise((resolve, reject) => {
+function runWrangler(): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
     log('Deploying with wrangler...');
     const child = spawn('npx', ['--no-install', 'wrangler', 'deploy', ...wranglerArgs], {
       stdio: 'inherit',
@@ -48,12 +48,12 @@ watcher.on('all', (event, file) => {
   log(`${event}: ${path.relative(watchDir, file)}`);
   deployer.notify();
 });
-watcher.on('error', (err) => log(`Watcher error: ${err.message}`));
+watcher.on('error', (err: unknown) => log(`Watcher error: ${err instanceof Error ? err.message : String(err)}`));
 
 log(`Watching ${watchDir} (debounce ${debounceMs}ms)`);
 if (env.DEPLOY_ON_START !== 'false') deployer.notify();
 
-async function shutdown() {
+async function shutdown(): Promise<void> {
   log('Shutting down...');
   await watcher.close();
   await deployer.stop();
