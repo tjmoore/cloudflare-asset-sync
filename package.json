@@ -7,15 +7,17 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/src/watcher.js",
-    "test": "tsc && node --test dist/test/deployer.test.js"
+    "test": "tsc && node --test dist/test/*.js"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
-    "chokidar": "^4.0.3",
+    "chokidar": "^6.0.0",
     "wrangler": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.6.0"
+    "@types/node": "^24",
+    "typescript": "^7.0.0"
   }
 }
