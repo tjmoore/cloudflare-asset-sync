@@ -12,5 +12,7 @@ RUN npm install --omit=dev
 COPY --from=build /app/dist ./dist
 COPY wrangler.jsonc ./
 ENV WATCH_DIR=/app/site WRANGLER_SEND_METRICS=false
+RUN mkdir .wrangler
+RUN chown -R node:node .wrangler
 USER node
 CMD ["node", "dist/src/watcher.js"]

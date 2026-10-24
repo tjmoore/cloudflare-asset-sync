@@ -5,6 +5,6 @@ services:
     env_file: .env
     environment:
       WATCH_DIR: /app/site
-      USE_POLLING: "true"
+      USE_POLLING: "false"
     volumes:
       - ./site:/app/site:ro
