@@ -1,7 +1,7 @@
 {
-  "name": "static-site-deploy-watcher",
+  "name": "cloudflare-asset-sync",
   "version": "1.0.0",
-  "description": "Watches a static site folder and deploys batched changes to a Cloudflare Worker with wrangler",
+  "description": "Watches a folder and deploys batched changes as static assets to a Cloudflare Worker using wrangler",
   "type": "module",
   "main": "dist/src/watcher.js",
   "scripts": {

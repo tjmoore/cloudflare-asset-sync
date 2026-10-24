@@ -1,8 +1,10 @@
 {
-  "name": "my-static-site",
+  "name": "my-worker",
   "compatibility_date": "2025-01-01",
   "assets": {
     // Folder watched by the service. Mounted at /site in the container.
-    "directory": "./site"
+    "directory": "./site",
+    // binding in case you want to reference the assets in your worker code
+    "binding": "ASSETS"
   }
 }

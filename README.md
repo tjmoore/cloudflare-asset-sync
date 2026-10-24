@@ -1,15 +1,15 @@
-# Cloudflare Worker Sync
+# Cloudflare Asset Sync
 
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/typescript-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/node.js-24-green.svg)](https://nodejs.org/)\
-[![Build](https://github.com/tjmoore/cloudflare-worker-sync/actions/workflows/build.yml/badge.svg)](https://github.com/tjmoore/cloudflare-worker-sync/actions/workflows/build.yml)
-[![Issues](https://img.shields.io/github/issues/tjmoore/cloudflare-worker-sync.svg)](https://github.com/tjmoore/cloudflare-worker-sync/issues)
-[![Release](https://img.shields.io/github/v/release/tjmoore/cloudflare-worker-sync.svg)](https://github.com/tjmoore/cloudflare-worker-sync/releases)
+[![Build](https://github.com/tjmoore/cloudflare-asset-sync/actions/workflows/build.yml/badge.svg)](https://github.com/tjmoore/cloudflare-asset-sync/actions/workflows/build.yml)
+[![Issues](https://img.shields.io/github/issues/tjmoore/cloudflare-asset-sync.svg)](https://github.com/tjmoore/cloudflare-asset-sync/issues)
+[![Release](https://img.shields.io/github/v/release/tjmoore/cloudflare-asset-sync.svg)](https://github.com/tjmoore/cloudflare-asset-sync/releases)
 
 A tool to automatically deploy static assets to a Cloudflare Worker when changes are detected in a specified folder.
 
-Watches a folder of files and, once changes have been quiet for `DEBOUNCE_MS`, runs `wrangler deploy` to publish them to a Cloudflare Worker (static assets).
+Watches a folder of files and, once changes have been quiet for `DEBOUNCE_MS`, runs `wrangler deploy` to publish them to a Cloudflare Worker.
 
 Deployable as a container or run via Node.js directly.
 
