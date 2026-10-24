@@ -9,14 +9,18 @@
 
 A tool to automatically deploy static assets to a Cloudflare Worker when changes are detected in a specified folder.
 
+This will create a Cloudflare Worker with the name specified in wrangler.jsonc or update an existing one if it already exists.
+
 Watches a folder of files and, once changes have been quiet for `DEBOUNCE_MS`, runs `wrangler deploy` to publish them to a Cloudflare Worker.
 
 Deployable as a container or run via Node.js directly.
 
 ## Setup
 1. Edit `wrangler.jsonc` (worker `name`, `assets.directory` = watched folder).
-2. `cp .env.example .env` and set `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` (token needs Workers edit permission).
-3. `npm install && npm run build && npm start`, or `docker compose up -d --build` (mounts watched folder, e.g. `./site`, at `/app/site`).
+2. If using a container, configure the volume mount for the watched folder (e.g., `./site` at `/app/site`), see docker-compose.yml.
+3. `cp .env.example .env` and set `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` (token needs Workers edit permission).
+4. `npm install && npm run build && npm start` to run locally,
+5. or for container build `docker compose up -d --build`.
 
 ## Behaviour
 - Every add/change/delete restarts the debounce timer, so bulk changes become one deploy.
@@ -31,6 +35,8 @@ Deployable as a container or run via Node.js directly.
 
 ## Notes
 
+/site is an example site folder that is being watched for changes.
+
 Dependencies:
 - [Node.js](https://nodejs.org/)
 - [Chokidar](https://github.com/paulmillr/chokidar) - File watcher for Node.js
@@ -40,4 +46,4 @@ Dev Dependencies:
 - [TypeScript](https://www.typescriptlang.org/)
 - [@types/node](https://www.npmjs.com/package/@types/node)
 
-Co-authored by GitHub Copilot
+Initial template co-authored by GitHub Copilot.
