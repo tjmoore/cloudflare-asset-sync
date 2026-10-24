@@ -38,7 +38,7 @@ Deployable as a container or run via Node.js directly.
 /site is an example site folder that is being watched for changes.
 
 Dependencies:
-- [Node.js](https://nodejs.org/)
+- [Node.js](https://nodejs.org/) - Node 24 or greater
 - [Chokidar](https://github.com/paulmillr/chokidar) - File watcher for Node.js
 - [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler/) - Cloudflare Workers CLI tool
 
