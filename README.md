@@ -11,7 +11,7 @@ A tool to automatically deploy static assets to a Cloudflare Worker when changes
 
 This will create a Cloudflare Worker with the name specified in wrangler.jsonc or update an existing one if it already exists.
 
-Watches a folder of files and, once changes have been quiet for `DEBOUNCE_MS`, runs `wrangler deploy` to publish them to a Cloudflare Worker.
+Watches a folder of files and, once changes have been quiet for `DEBOUNCE_MS`, runs `wrangler deploy` to publish them to a Cloudflare Worker. Before each deploy, a `sitemap.xml` listing the site's `.html` files is generated in `WATCH_DIR` using `SITE_URL` as the base URL (skipped if `SITE_URL` is unset).
 
 Deployable as a container or run via Node.js directly.
 

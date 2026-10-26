@@ -1,10 +1,11 @@
 // Watcher and deployer setup for Cloudflare Workers site.
 
-import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import chokidar from 'chokidar';
 import { Deployer } from './deployer.js';
+import { SitemapGenerator } from './sitemapGenerator.js';
+import { WranglerDeploy } from './wranglerDeploy.js';
 
 const env = process.env;
 const watchDir = path.resolve(env.WATCH_DIR || './site');
@@ -17,28 +18,22 @@ if (!existsSync(watchDir)) {
   process.exit(1);
 }
 
+const sitemap = new SitemapGenerator(watchDir, env.SITE_URL || '', log);
+const wrangler = new WranglerDeploy(wranglerArgs, log);
+
 /**
- * Runs the wrangler deploy command.
+ * Generates the sitemap, then deploys with wrangler.
  */
-function runWrangler(): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    log('Deploying with wrangler...');
-    const child = spawn('npx', ['--no-install', 'wrangler', 'deploy', ...wranglerArgs], {
-      stdio: 'inherit',
-      shell: process.platform === 'win32',
-    });
-    child.on('error', reject);
-    child.on('exit', (code) =>
-      code === 0 ? (log('Deploy complete'), resolve()) : reject(new Error(`wrangler exited with code ${code}`)),
-    );
-  });
+async function deploy(): Promise<void> {
+  await sitemap.generate();
+  await wrangler.run();
 }
 
 /**
  * Creates a deployer instance with the specified configuration.
  */
 const deployer = new Deployer({
-  deploy: runWrangler,
+  deploy,
   debounceMs,
   maxRetries: Number(env.MAX_RETRIES || 3),
   retryDelayMs: Number(env.RETRY_DELAY_MS || 10000),
@@ -50,7 +45,10 @@ const deployer = new Deployer({
  */
 const watcher = chokidar.watch(watchDir, {
   ignoreInitial: true,
-  ignored: (p) => p !== watchDir && /(^|[\\/])(\.[^\\/]+|[^\\/]*~|[^\\/]*\.(swp|tmp))$/.test(p),
+  ignored: (p) =>
+    p !== watchDir &&
+    (path.relative(watchDir, p) === SitemapGenerator.fileName ||
+      /(^|[\\/])(\.[^\\/]+|[^\\/]*~|[^\\/]*\.(swp|tmp))$/.test(p)),
   backend: env.USE_POLLING === 'true' ? 'polling' : 'auto',
   awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
 });
