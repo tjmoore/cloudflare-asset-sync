@@ -27,6 +27,8 @@ export class SitemapGenerator {
       this.log('SITE_URL not set; skipping sitemap generation');
       return;
     }
+    this.log(`Sitemap generation started. Site URL: ${this.baseUrl}`);
+    
     const files = await this.listHtmlFiles(this.siteDir);
     const base = this.baseUrl.replace(/\/+$/, '');
     const urls = files

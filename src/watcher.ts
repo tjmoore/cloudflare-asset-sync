@@ -6,9 +6,13 @@ import chokidar from 'chokidar';
 import { Deployer } from './deployer.js';
 import { SitemapGenerator } from './sitemapGenerator.js';
 import { WranglerDeploy } from './wranglerDeploy.js';
+import { loadEnvFile } from 'node:process';
+
+loadEnvFile();
 
 const env = process.env;
 const watchDir = path.resolve(env.WATCH_DIR || './site');
+const siteUrl = env.SITE_URL || '';
 const debounceMs = Number(env.DEBOUNCE_MS || 5000);
 const wranglerArgs = (env.WRANGLER_ARGS || '').split(/\s+/).filter(Boolean);
 const log = (msg: string): void => console.log(`[${new Date().toISOString()}] ${msg}`);
@@ -18,7 +22,7 @@ if (!existsSync(watchDir)) {
   process.exit(1);
 }
 
-const sitemap = new SitemapGenerator(watchDir, env.SITE_URL || '', log);
+const sitemap = new SitemapGenerator(watchDir, siteUrl, log);
 const wrangler = new WranglerDeploy(wranglerArgs, log);
 
 /**
