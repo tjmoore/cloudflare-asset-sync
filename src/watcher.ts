@@ -40,6 +40,11 @@ async function deploy(): Promise<void> {
   await sitemap.generate();
   await robots.generate();
   await wrangler.run();
+
+  // Cleanup generated files after deployment
+  // TODO: only if they didn't exist before
+  await sitemap.cleanup();
+  await robots.cleanup();
 }
 
 /**

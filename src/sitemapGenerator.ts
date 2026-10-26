@@ -1,4 +1,4 @@
-import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { readdir, readFile, stat, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 
 /**
@@ -69,6 +69,14 @@ export class SitemapGenerator {
     if (existing === xml) return;
     await writeFile(target, xml, 'utf8');
     this.log(`Sitemap generated with ${urls.length} URLs`);
+  }
+
+  /**
+   * Removes the generated sitemap file.
+   */
+  async cleanup(): Promise<void> {
+    const target = path.join(this.siteDir, SitemapGenerator.fileName);
+    await rm(target);
   }
 
   /** Formats a date as W3C datetime in UTC, e.g. 2026-01-02T03:04:05Z. */
