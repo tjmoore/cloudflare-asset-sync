@@ -7,4 +7,4 @@ services:
       WATCH_DIR: /app/site
       USE_POLLING: "false"
     volumes:
-      - ./site:/app/site:ro
+      - ./site:/app/site:rw

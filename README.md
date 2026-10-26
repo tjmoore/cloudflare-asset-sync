@@ -22,6 +22,12 @@ Deployable as a container or run via Node.js directly.
 4. `npm install && npm run build && npm start` to run locally,
 5. or for container build `docker compose up -d --build`.
 
+### Sitemap Generation
+
+Optionally, before each deploy a simple `sitemap.xml` listing the site's `.html` files is generated in `WATCH_DIR` using `SITE_URL` as the base URL (skipped if `SITE_URL` is unset). `robots.txt` is created  if missing, and a `Sitemap:` line is added if not already present. Each entry has `lastmod` (file modified time, UTC), `changefreq` (`SITEMAP_CHANGEFREQ_DEFAULT`, default `monthly`) and `priority` (`SITEMAP_PRIORITY_DEFAULT`, default `0.5`). All entries have the same defaults at present.
+
+Note this requires write access to the watched folder to create the `sitemap.xml` file and 'rw' mount for the site when using a container.
+
 ## Behaviour
 - Every add/change/delete restarts the debounce timer, so bulk changes become one deploy.
 - Only one deploy runs at a time; changes during a deploy trigger one follow-up deploy.
