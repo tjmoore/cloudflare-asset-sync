@@ -3,3 +3,4 @@ node_modules
 .wrangler
 dist/
 site/sitemap.xml
+site/robots.txt

@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import chokidar from 'chokidar';
 import { Deployer } from './deployer.js';
+import { RobotsGenerator } from './robotsGenerator.js';
 import { SitemapGenerator } from './sitemapGenerator.js';
 import { WranglerDeploy } from './wranglerDeploy.js';
 import { loadEnvFile } from 'node:process';
@@ -26,13 +27,15 @@ const sitemap = new SitemapGenerator(watchDir, siteUrl, log, {
   changeFreq: env.SITEMAP_CHANGEFREQ_DEFAULT || 'monthly',
   priority: env.SITEMAP_PRIORITY_DEFAULT || '0.5',
 });
+const robots = new RobotsGenerator(watchDir, siteUrl, log);
 const wrangler = new WranglerDeploy(wranglerArgs, log);
 
 /**
- * Generates the sitemap, then deploys with wrangler.
+ * Generates the sitemap and robots.txt, then deploys with wrangler.
  */
 async function deploy(): Promise<void> {
   await sitemap.generate();
+  await robots.generate();
   await wrangler.run();
 }
 
@@ -55,6 +58,7 @@ const watcher = chokidar.watch(watchDir, {
   ignored: (p) =>
     p !== watchDir &&
     (path.relative(watchDir, p) === SitemapGenerator.fileName ||
+     path.relative(watchDir, p) === RobotsGenerator.fileName ||
       /(^|[\\/])(\.[^\\/]+|[^\\/]*~|[^\\/]*\.(swp|tmp))$/.test(p)),
   backend: env.USE_POLLING === 'true' ? 'polling' : 'auto',
   awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
