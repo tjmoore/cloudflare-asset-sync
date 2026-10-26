@@ -9,7 +9,10 @@ import { SitemapGenerator } from './sitemapGenerator.js';
 import { WranglerDeploy } from './wranglerDeploy.js';
 import { loadEnvFile } from 'node:process';
 
-loadEnvFile();
+// Load environment variables from .env file if it exists, else rely on process environment variables.
+if (existsSync('.env')) {
+  loadEnvFile();
+}
 
 const env = process.env;
 const watchDir = path.resolve(env.WATCH_DIR || './site');
