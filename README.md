@@ -11,7 +11,7 @@ A tool to automatically deploy static assets to a Cloudflare Worker when changes
 
 This will create a Cloudflare Worker with the name specified in wrangler.jsonc or update an existing one if it already exists.
 
-Watches a folder of files and, once changes have been quiet for `DEBOUNCE_MS`, runs `wrangler deploy` to publish them to a Cloudflare Worker. Before each deploy, a `sitemap.xml` listing the site's `.html` files is generated in `WATCH_DIR` using `SITE_URL` as the base URL (skipped if `SITE_URL` is unset).
+Watches a folder of files and, once changes have been quiet for `DEBOUNCE_MS`, runs `wrangler deploy` to publish them to a Cloudflare Worker.
 
 Deployable as a container or run via Node.js directly.
 
@@ -21,6 +21,12 @@ Deployable as a container or run via Node.js directly.
 3. `cp .env.example .env` and set `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` (token needs Workers edit permission).
 4. `npm install && npm run build && npm start` to run locally,
 5. or for container build `docker compose up -d --build`.
+
+### Sitemap Generation
+
+Optionally, before each deploy a simple `sitemap.xml` listing the site's `.html` files is generated in `WATCH_DIR` using `SITE_URL` as the base URL (skipped if `SITE_URL` is unset). Each entry has `lastmod` (file modified time, UTC), `changefreq` (`SITEMAP_CHANGEFREQ_DEFAULT`, default `monthly`) and `priority` (`SITEMAP_PRIORITY_DEFAULT`, default `0.5`). All entries have the same defaults at present.
+
+Note this requires write access to the watched folder to create the `sitemap.xml` file and 'rw' mount for the site when using a container.
 
 ## Behaviour
 - Every add/change/delete restarts the debounce timer, so bulk changes become one deploy.

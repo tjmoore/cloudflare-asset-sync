@@ -22,7 +22,10 @@ if (!existsSync(watchDir)) {
   process.exit(1);
 }
 
-const sitemap = new SitemapGenerator(watchDir, siteUrl, log);
+const sitemap = new SitemapGenerator(watchDir, siteUrl, log, {
+  changeFreq: env.SITEMAP_CHANGEFREQ_DEFAULT || 'monthly',
+  priority: env.SITEMAP_PRIORITY_DEFAULT || '0.5',
+});
 const wrangler = new WranglerDeploy(wranglerArgs, log);
 
 /**
