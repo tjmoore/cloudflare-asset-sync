@@ -8,10 +8,13 @@ This project watches a specified folder for changes and automatically deploys th
 - The project uses Cloudflare Workers for deployment of static assets.
 - The project supports both direct Node.js execution and containerized deployment.
 - src/watcher.ts:
-  - Sets up a file watcher, deployer, and wrangler function to push to Cloudflare.
-  - The watcher notifies the deployer on changes to trigger the wrangler function.
+  - Sets up a file watcher, deployer, and notifies the deployer on file changes.
 - src/deployer.ts:
   - Handles debounced, single-flight deployment with retry logic.
+- src/wranglerDeploy.ts:
+  - Handles deployment to Cloudflare Workers using the Wrangler CLI.
+- src/*Generator.ts:
+  - Implements specific file generators like SitemapGenerator and RobotsGenerator.
 
 ## Code Style
 

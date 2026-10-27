@@ -35,3 +35,48 @@ test('retries on failure', async () => {
   assert.equal(n, 3);
   await d.stop();
 });
+
+test('cleanup runs once after successful retries', async () => {
+  let deploys = 0;
+  let cleanups = 0;
+  const d = new Deployer({
+    deploy: async () => { if (++deploys < 3) throw new Error('boom'); },
+    cleanup: async () => { cleanups++; },
+    debounceMs: 10, retryDelayMs: 10, maxRetries: 3,
+  });
+  d.notify();
+  await sleep(300);
+  assert.equal(deploys, 3);
+  assert.equal(cleanups, 1);
+  await d.stop();
+});
+
+test('cleanup runs once after all retries fail', async () => {
+  let deploys = 0;
+  let cleanups = 0;
+  const d = new Deployer({
+    deploy: async () => { deploys++; throw new Error('boom'); },
+    cleanup: async () => { cleanups++; },
+    debounceMs: 10, retryDelayMs: 10, maxRetries: 2,
+  });
+  d.notify();
+  await sleep(300);
+  assert.equal(deploys, 3);
+  assert.equal(cleanups, 1);
+  await d.stop();
+});
+
+test('cleanup is called after the final deploy, not between follow-ups', async () => {
+  const events: string[] = [];
+  const d = new Deployer({
+    deploy: async () => { events.push('deploy'); await sleep(100); },
+    cleanup: async () => { events.push('cleanup'); },
+    debounceMs: 20,
+  });
+  d.notify();
+  await sleep(60);
+  d.notify();
+  await sleep(400);
+  assert.deepEqual(events, ['deploy', 'deploy', 'cleanup']);
+  await d.stop();
+});

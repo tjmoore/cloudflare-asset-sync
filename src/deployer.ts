@@ -7,6 +7,11 @@ export interface DeployerOptions {
    */
   deploy: () => Promise<void>;
   /**
+   * Optional function run once all deploy attempts (including retries) have finished
+   * and no further deployment is pending. Errors are logged and ignored.
+   */
+  cleanup?: () => Promise<void>;
+  /**
    * Debounce interval in milliseconds.
    */
   debounceMs?: number;
@@ -29,6 +34,7 @@ export interface DeployerOptions {
  */
 export class Deployer {
   private readonly deploy: () => Promise<void>;
+  private readonly cleanup?: () => Promise<void>;
   private readonly debounceMs: number;
   private readonly maxRetries: number;
   private readonly retryDelayMs: number;
@@ -42,8 +48,9 @@ export class Deployer {
    * Creates a new Deployer instance.
    * @param options Configuration options for the deployer.
    */
-  constructor({ deploy, debounceMs = 5000, maxRetries = 3, retryDelayMs = 10000, log = () => {} }: DeployerOptions) {
+  constructor({ deploy, cleanup, debounceMs = 5000, maxRetries = 3, retryDelayMs = 10000, log = () => {} }: DeployerOptions) {
     this.deploy = deploy;
+    this.cleanup = cleanup;
     this.debounceMs = debounceMs;
     this.maxRetries = maxRetries;
     this.retryDelayMs = retryDelayMs;
@@ -63,10 +70,21 @@ export class Deployer {
   private kick(): void {
     this.timer = null;
     if (this.running || this.stopped) return; // follow-up is scheduled when current run ends
-    this.running = this.run().finally(() => {
+    this.running = this.run().finally(async () => {
+      const followUp = this.dirty && !this.stopped;
+      if (!followUp && !this.timer) await this.runCleanup();
       this.running = null;
       if (this.dirty && !this.timer && !this.stopped) this.kick();
     });
+  }
+
+  private async runCleanup(): Promise<void> {
+    if (!this.cleanup) return;
+    try {
+      await this.cleanup();
+    } catch (err) {
+      this.log(`Cleanup failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
 
   private async run(): Promise<void> {
