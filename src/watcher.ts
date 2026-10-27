@@ -34,30 +34,45 @@ const robots = new RobotsGenerator(watchDir, siteUrl, log);
 const wrangler = new WranglerDeploy(wranglerArgs, log);
 
 /**
- * Generates the sitemap and robots.txt, then deploys with wrangler.
+ * Generates the sitemap and robots.txt ahead of notifying the deployer.
  */
-async function deploy(): Promise<void> {
+async function generate(): Promise<void> {
   await sitemap.generate();
   await robots.generate();
-  await wrangler.run();
+}
 
-  if (env.CLEANUP_GENERATED_FILES === 'true') {
-    // Cleanup generated files after deployment
-    await sitemap.cleanup();
-    await robots.cleanup();
-  }
+/**
+ * Removes generated files once deploy attempts have finished.
+ */
+async function cleanup(): Promise<void> {
+  if (env.CLEANUP_GENERATED_FILES !== 'true') return;
+  await sitemap.cleanup();
+  await robots.cleanup();
 }
 
 /**
  * Creates a deployer instance with the specified configuration.
  */
 const deployer = new Deployer({
-  deploy,
+  deploy: () => wrangler.run(),
+  cleanup,
   debounceMs,
   maxRetries: Number(env.MAX_RETRIES || 3),
   retryDelayMs: Number(env.RETRY_DELAY_MS || 10000),
   log,
 });
+
+let generating: Promise<void> = Promise.resolve();
+
+/**
+ * Generates files (serialized) and then notifies the deployer.
+ */
+function generateAndNotify(): void {
+  generating = generating
+    .then(generate)
+    .catch((err: unknown) => log(`Generation failed: ${err instanceof Error ? err.message : String(err)}`))
+    .then(() => deployer.notify());
+}
 
 /**
  * Sets up the file watcher for the specified directory.
@@ -78,7 +93,7 @@ const watcher = chokidar.watch(watchDir, {
  */
 watcher.on('all', (event, file) => {
   log(`${event}: ${path.relative(watchDir, file)}`);
-  deployer.notify();
+  generateAndNotify();
 });
 
 /**
@@ -87,7 +102,7 @@ watcher.on('all', (event, file) => {
 watcher.on('error', (err: unknown) => log(`Watcher error: ${err instanceof Error ? err.message : String(err)}`));
 
 log(`Watching ${watchDir} (debounce ${debounceMs}ms)`);
-if (env.DEPLOY_ON_START !== 'false') deployer.notify();
+if (env.DEPLOY_ON_START !== 'false') generateAndNotify();
 
 /**
  * Shuts down the watcher and deployer gracefully.
@@ -95,6 +110,7 @@ if (env.DEPLOY_ON_START !== 'false') deployer.notify();
 async function shutdown(): Promise<void> {
   log('Shutting down...');
   await watcher.close();
+  await generating;
   await deployer.stop();
   process.exit(0);
 }
