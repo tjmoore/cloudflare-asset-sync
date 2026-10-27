@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { SitemapGenerator } from './sitemapGenerator.js';
 
@@ -8,6 +8,8 @@ import { SitemapGenerator } from './sitemapGenerator.js';
 export class RobotsGenerator {
   static readonly fileName = 'robots.txt';
   static readonly defaultContent = 'User-agent: *\nAllow: /\n';
+
+  private newFile: boolean = false;
 
   /**
    * @param siteDir Directory containing the site files.
@@ -39,6 +41,16 @@ export class RobotsGenerator {
     const separator = content.endsWith('\n') ? '' : '\n';
     const updated = hasReference ? content : `${content}${separator}\nSitemap: ${sitemapUrl}\n`;
     await writeFile(target, updated, 'utf8');
-    this.log(existing === null ? 'robots.txt created' : 'robots.txt updated with sitemap reference');
+    this.newFile = existing === null;
+    this.log(this.newFile ? 'robots.txt created' : 'robots.txt updated with sitemap reference');
+  }
+
+  /**
+   * Removes the generated robots.txt file.
+   */
+  async cleanup(): Promise<void> {
+    if (!this.newFile) return;
+    const target = path.join(this.siteDir, RobotsGenerator.fileName);
+    await rm(target);
   }
 }

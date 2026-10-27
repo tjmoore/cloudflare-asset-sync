@@ -1,4 +1,4 @@
-import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { readdir, readFile, stat, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 
 /**
@@ -18,6 +18,8 @@ export class SitemapGenerator {
   static readonly fileName = 'sitemap.xml';
   private readonly changeFreq: string;
   private readonly priority: string;
+
+  private newFile: boolean = false;
 
   /**
    * @param siteDir Directory containing the site files.
@@ -68,7 +70,17 @@ export class SitemapGenerator {
     const existing = await readFile(target, 'utf8').catch(() => null);
     if (existing === xml) return;
     await writeFile(target, xml, 'utf8');
-    this.log(`Sitemap generated with ${urls.length} URLs`);
+    this.newFile = existing === null;
+    this.log(this.newFile ? `Sitemap created with ${urls.length} URLs` : `Sitemap updated with ${urls.length} URLs`);
+  }
+
+  /**
+   * Removes the generated sitemap file.
+   */
+  async cleanup(): Promise<void> {
+    if (!this.newFile) return;
+    const target = path.join(this.siteDir, SitemapGenerator.fileName);
+    await rm(target);
   }
 
   /** Formats a date as W3C datetime in UTC, e.g. 2026-01-02T03:04:05Z. */
