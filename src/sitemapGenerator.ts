@@ -19,6 +19,8 @@ export class SitemapGenerator {
   private readonly changeFreq: string;
   private readonly priority: string;
 
+  private newFile: boolean = false;
+
   /**
    * @param siteDir Directory containing the site files.
    * @param baseUrl Public base URL of the site (e.g. https://example.com).
@@ -68,13 +70,15 @@ export class SitemapGenerator {
     const existing = await readFile(target, 'utf8').catch(() => null);
     if (existing === xml) return;
     await writeFile(target, xml, 'utf8');
-    this.log(`Sitemap generated with ${urls.length} URLs`);
+    this.newFile = existing === null;
+    this.log(this.newFile ? `Sitemap created with ${urls.length} URLs` : `Sitemap updated with ${urls.length} URLs`);
   }
 
   /**
    * Removes the generated sitemap file.
    */
   async cleanup(): Promise<void> {
+    if (!this.newFile) return;
     const target = path.join(this.siteDir, SitemapGenerator.fileName);
     await rm(target);
   }
