@@ -1,6 +1,7 @@
 // Watcher and deployer setup for Cloudflare Workers site.
 
 import { existsSync } from 'node:fs';
+import { copyFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import chokidar from 'chokidar';
 import { Deployer } from './deployer.js';
@@ -51,10 +52,29 @@ async function cleanup(): Promise<void> {
 }
 
 /**
+ * Copies .assetsignore from the project root into the watch directory for the
+ * duration of the deploy, then removes it.
+ */
+async function deployAssets(): Promise<void> {
+  const source = path.resolve('.assetsignore');
+  const target = path.join(watchDir, '.assetsignore');
+  const copied = existsSync(source) && source !== target;
+  if (copied) {
+    await copyFile(source, target);
+    log('Copied .assetsignore to watch directory');
+  }
+  try {
+    await wrangler.run();
+  } finally {
+    if (copied) await rm(target, { force: true });
+  }
+}
+
+/**
  * Creates a deployer instance with the specified configuration.
  */
 const deployer = new Deployer({
-  deploy: () => wrangler.run(),
+  deploy: deployAssets,
   cleanup,
   debounceMs,
   maxRetries: Number(env.MAX_RETRIES || 3),
