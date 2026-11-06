@@ -1,0 +1,2 @@
+# Add file folder patterns to ignore on deploy if required
+# Format is the same as .gitignore
