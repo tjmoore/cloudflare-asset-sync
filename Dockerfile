@@ -11,6 +11,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY wrangler.jsonc ./
+COPY .assetsignore ./
 ENV WATCH_DIR=/app/site WRANGLER_SEND_METRICS=false
 RUN mkdir .wrangler
 RUN chown -R node:node .wrangler
